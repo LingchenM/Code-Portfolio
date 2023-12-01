@@ -1,8 +1,31 @@
 # Code-Portfolio
-#### Project Description:
+### Project Description:
 
-&nbsp;&nbsp;&nbsp;&nbsp;Calendar: 
+- ###### Calendar
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Users can register and login to their account. They can add, delete, edit the event, and the event will be shown on the corresponding date in the calendar with different color based on the events’ category.
+  A simple calendar that allows users to add and remove events dynamically.
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Website will remind the user before 5 min of the starting time of an event.
+- ###### Chat Room Website
+
+  A multi-room chat server that contain a main lobby where users sign on with a nickname and can communicate with each other.
+
+- ###### Comm with AES-GCM encryption
+
+  A simple communication software that use AES-GCM encryption to ensure message confidentiality and integrity.
+
+- ###### File Managing System
+
+  A file system works like Linux. Supports cat, copy, display, ls, remove, rename, and touch.
+
+- ###### File Sharing Website
+
+  A simple file sharing site that supports uploading, viewing, sharing, and deleting files associated with various users. 
+
+- ###### Dynamic Memory Allocation Simulator
+
+  A heap simulator that supports initialization, alloc, free, realloc, calloc, extend heap, and coalesce.
+
+- ###### News Website
+
+  A news website where users can add commentary and comments.
+
