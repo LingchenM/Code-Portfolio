@@ -1,4 +1,3 @@
-# Calendar
 ## Description
 
 - Support a month-by-month view of the calendar.
