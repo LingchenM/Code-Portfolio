@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+        <title>Chat Free</title>
+        <script src="/socket.io/socket.io.js"></script>
+        <style>
+            .list {
+                position: absolute;
+                background-color: #222222;
+                width: 30%;
+                height: 100%;
+                left: 10px;
+            }
+
+            #chatbox {
+                position: absolute;
+                background-color: #444444;
+                width: 55%;
+                height: 75%;
+                max-height: 75%;
+                overflow-y: auto;
+                margin: 0 auto; 
+                top: 25px;
+                right: 20px;
+            }
+
+            #send {
+                position: absolute;
+                text-align: center;
+                background-color: #444444;
+                width: 55%;
+                height: 20%;
+                margin: 0 auto; 
+                right: 20px;
+                bottom: 0;
+            }
+
+            #message_input {
+                height: 40%;
+                width: 90%;
+            }
+
+            .clearfix::after {
+                content: "";
+                display: table;
+                clear: both;
+            }
+
+            body {
+                background-color: black;
+                color:azure;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+            }
+
+            #self{
+                display: block;
+                width: 97%;
+                padding-right: 5px;
+                text-align: right;
+            }
+            #other{
+                display: block;
+                width: 97%;
+                padding-left: 5px;
+                text-align: left;
+            }
+
+        </style>
+        <script>
+            let allrooms = [];
+            let currentRoom;
+            let current_admin;
+            let coadmin_ls = [];
+            let user;
+            let user_list = [];
+            let socketio = io.connect();
+            socketio.on("message_toClient",function(data) {
+                console.log("received.");
+                if (data['result']){
+                    // show public message
+                    if (data['receiver'] == null){
+                        document.getElementById("chatbox").appendChild(document.createElement("hr"));
+                        let messageSpan = document.createElement("span");
+                        if (data['nickname'] == user){
+                            messageSpan.id = "self";
+                        }
+                        else{
+                            messageSpan.id = "other";
+                        }
+                        messageSpan.textContent = "   "+data['nickname'] + ": " + data['message']+"   ";
+                        document.getElementById("chatbox").appendChild(messageSpan);
+                    }
+                    else{
+                        // show private message
+                        if (data['receiver'] == user || data['nickname'] == user){
+                            document.getElementById("chatbox").appendChild(document.createElement("hr"));
+                            let messageSpan = document.createElement("span");
+                            if (data['nickname'] == user){
+                                messageSpan.id = "self";
+                            }
+                            else{
+                                messageSpan.id = "other";
+                            }
+                            messageSpan.textContent = "   "+data['nickname'] + ": " + data['message'] + " (private)"+"   ";
+                            document.getElementById("chatbox").appendChild(messageSpan);
+                        }
+                    }
+                }
+                else{
+                    if (data['nickname'] == user){
+                        alert("You are muted.")
+                    }
+                }
+            });
+
+            // check registation result
+            socketio.on('new_user_result', function(data){
+                if (data['nickname'] == user){
+                    if (data['result']){
+                        let create_room = document.getElementById('create_room');
+                        let chatroom_ls = document.getElementById('chatRoom_ls');
+                        create_room.style.display = "block";
+                        chatroom_ls.style.display = "block";
+                        let enter_nickname = document.getElementById('enter_name');
+                        enter_nickname.style.display = "none";
+                        socketio.emit('get_room_request', {nickname_: user});
+                    }
+                    else{
+                        alert("nickname not available.");
+                    }
+                }
+                
+            });
+
+            // update room list
+            socketio.on('all_rooms', function(data){
+                allrooms = data['room'];
+                room_list();
+            });
+
+            // check create request result and update room list
+            socketio.on('create_publicroom_result', function(data){
+                if (data['result']){
+                    allrooms = data['allroom'];
+                }
+                else{
+                    alert("Room name not valid.");
+                }
+                socketio.emit('get_room_request', {nickname_: user});
+            })
+            socketio.on('create_privateroom_result', function(data){
+                if (data['result']){
+                    allrooms = data['allroom'];
+                }
+                else{
+                    alert("Room name not valid.");
+                }
+                socketio.emit('get_room_request', {nickname_: user});
+            })
+
+            // check user join result
+            socketio.on('join_room_request_result', function(data){
+                if (data['nickname'] == user || data['room'] == currentRoom){
+                    if (data['result']){
+                        currentRoom = data['room'];
+                        console.log("current room:", currentRoom);
+                        let chatroom = document.getElementById("chatRoom_ls");
+                        chatroom.style.display = "none";
+                        let chatbox = document.getElementById("chatbox");
+                        chatbox.style.display = "block";
+                        document.getElementById("send").style.display = "block";
+                        socketio.emit('get_user_in_room', {room: data['room'], nickname_: user});
+                    }
+                    else{
+                        if (data['banned']) {
+                            if (data['nickname'] == user){
+                                alert("You are banned from this room.");
+                            }
+                        }
+                        else{
+                            alert("failed to join this room.");
+                        }
+                        
+                    }
+                }
+            })
+
+            // get users in the room
+            socketio.on('get_user_in_room_result', function(data){
+                if (data['nickname'] == user){
+                    if (data['result']){
+                        user_list = data['list'];
+                        current_admin = data['owner'];
+                        coadmin_ls = data['coadmin']
+                        console.log('current admin:', current_admin);
+                        let user_visible = document.getElementById('user_visible');
+                        let content = "<option value='all'>everyone</option>";
+                        for (const userls of user_list){
+                            if (userls == user){
+                                content += `<option value='${userls}'>${userls} (yourself)</option>`;
+                            }
+                            else{
+                                content += `<option value='${userls}'>${userls}</option>`;
+                            }
+                        }
+                        user_visible.innerHTML = content;
+                        userList();
+                    }
+                }
+            })
+            
+            // user kicked result
+            socketio.on('user_kicked', function(data) {
+                if (data['kicked_user'] == user) {
+                    alert("You have been kicked from the room");
+                    document.getElementById("chatbox").style.display = "none";
+                    document.getElementById("send").style.display = "none";
+                    document.getElementById("user_ls").style.display = "none";
+                    let chatroom = document.getElementById("chatRoom_ls");
+                    chatroom.style.display = "block";
+                    currentRoom = "";
+                }
+                else{
+                    socketio.emit('get_user_in_room', {room: data['room'], nickname_: user});
+                }
+                
+            });
+
+            // user quit result
+            socketio.on('user_quit', function(data){
+                if (data['quit_user'] == user){
+                    alert("You quit the room");
+                    document.getElementById("chatbox").style.display = "none";
+                    document.getElementById("send").style.display = "none";
+                    document.getElementById("user_ls").style.display = "none";
+                    let chatroom = document.getElementById("chatRoom_ls");
+                    chatroom.style.display = "block";
+                    currentRoom = "";
+                }
+                else{
+                    socketio.emit('get_user_in_room', {room: data['room'], nickname_: user});
+                }
+            })
+
+            // user banned result
+            socketio.on('user_banned', function(data) {
+                if (data['banned_user'] === user) {
+                    document.getElementById("chatbox").style.display = "none";
+                    document.getElementById("send").style.display = "none";
+                    document.getElementById("user_ls").style.display = "none";
+                    alert("You have been banned from the room");
+                    let chatroom = document.getElementById("chatRoom_ls");
+                    chatroom.style.display = "block";
+                    currentRoom = "";
+                }
+                else{
+                    socketio.emit('get_user_in_room', {room: data['room'], nickname_: user});
+                }
+                
+            });
+
+            // user muted result
+            socketio.on('user_muted', function(data){
+                if (data['muted_user'] == user){
+                    alert("You are muted.");
+                }
+            });
+
+            // user unmuted result
+            socketio.on('user_unmuted', function(data){
+                if (data['unmuted_user'] == user){
+                    alert("You are unmuted.");
+                }
+            });
+
+            // user assigned result
+            socketio.on('user_assigned', function(data){
+                if (data['assigned_user'] == user){
+                    alert("You are now co-Admin");
+                }
+                socketio.emit('get_user_in_room', {room: data['room'], nickname_: user});
+            });
+
+            // user removed co-admin result
+            socketio.on('user_unassigned', function(data){
+                if (data['unassigned_user'] == user){
+                    alert("You are now removed from co-Admin");
+                }
+                socketio.emit('get_user_in_room', {room: data['room'], nickname_: user});
+            });
+
+            // send message to server
+            function sendMessage(){
+                let user_visible = document.getElementById('user_visible').value;
+                let msg = document.getElementById("message_input").value;
+                if (user_visible == "all"){
+                    socketio.emit("message_to_server", {message:msg, room: currentRoom, name: user});
+                }
+                else{
+                    socketio.emit("private_message_to_server", {message:msg, room: currentRoom, name: user, receiver: user_visible});
+                }
+                document.getElementById("message_input").value = "";
+            }
+
+            // register users
+            function enterName(){
+                const nickname = document.getElementById("name").value;
+                user = nickname;
+                socketio.emit('new_user', {nickname_: nickname});
+            }
+
+            // show room list
+            function room_list(){
+                let chatRooms_ls = document.getElementById('chatRoom_ls');
+                let content = "<h2> Chat Rooms Available:</h2>";
+                for (const room of allrooms){
+                    content += `<p onclick="enterRoom('${room.room_name}')"> ${room.room_name}</p><br>`
+                }
+                chatRooms_ls.innerHTML = content;
+            }
+
+            // create room
+            function create_public_room(){
+                let public_room_name = document.getElementById('create_publicroom_name').value;
+                console.log("room name: ", public_room_name);
+                socketio.emit('create_publicroom_request', {roomname: public_room_name, admin: user, nickname_: user});
+            }
+            function create_private_room(){
+                let private_room_name = document.getElementById('create_privateroom_name').value;
+                const pass = document.getElementById("privateroom_pass").value;
+                console.log("password: ", pass)
+                socketio.emit('create_privateroom_request', {roomname: private_room_name, roompass: pass, admin: user, nickname_: user});
+            }
+
+            // enter room
+            function enterRoom(name){
+                let idx = -1;
+                for (const room of allrooms){
+                    if (room.room_name == name){
+                        idx += 1;
+                        break;
+                    }
+                    idx += 1;
+                }
+                if (allrooms[idx].room_pass == null){
+                    socketio.emit('join_room_request', {roomname: name, nickname_:user});
+                }
+                else{
+                    let password = prompt("please enter password: ", "");
+                    if (password != null && password != ""){
+                        if (password == allrooms[idx].room_pass){
+                        socketio.emit('join_room_request', {roomname: name, nickname_:user});
+                        }
+                        else{
+                            alert("failed to join this room.");
+                        }
+                    }
+                }
+            }
+
+            // show user in room
+            function userList(){
+                let userInroom = document.getElementById('user_ls');
+                userInroom.style.display = "block";
+                let content = `<h2> Users in the Room ${currentRoom}: </h2>`;
+                // admin
+                if (user == current_admin){
+                    for (const userls of user_list){
+                        if (userls == user){
+                            content += `<p>${user} (me/admin)</p><br>`;
+                        }
+                        else{
+                            if (coadmin_ls.includes(userls)){
+                                content += `<p>${userls} (co-Admin)</p><button id="mute${userls}" onclick="muteUser('${userls}')">mute</button><br>
+                                    <button id="kick" onclick="kickUser('${userls}')">kick</button>
+                                    <button id="ban" onclick="banUser('${userls}')">ban</button><br>
+                                    <button id="assign${userls}" onclick="unassignUser('${userls}')">remove co-admin</button><br>`;
+                            }
+                            else{
+                                content += `<p>${userls} </p><button id="mute${userls}" onclick="muteUser('${userls}')">mute</button><br>
+                                    <button id="kick" onclick="kickUser('${userls}')">kick</button>
+                                    <button id="ban" onclick="banUser('${userls}')">ban</button><br>
+                                    <button id="assign${userls}" onclick="assignUser('${userls}')">assign co-admin</button><br>`;
+                            }
+                        }   
+                    }
+                }
+                // co-admin
+                else if (coadmin_ls.includes(user)){
+                    for (const userls of user_list){
+                        if (userls == user){
+                            content += `<p>${user} (me)</p><br>`;
+                        }
+                        else{
+                            if (userls == current_admin){
+                                content += `<p>${userls} (Admin)</p><br>`;
+                            }
+                            else if (coadmin_ls.includes(userls)){
+                                content += `<p>${userls} (co-Admin)</p><br>`;
+                            }
+                            else{
+                                content += `<p>${userls}</p><button id="mute${userls}" onclick="muteUser('${userls}')">ban</button><br>
+                                    <button id="kick" onclick="kickUser('${userls}')">kick</button>`;
+                            }
+                            
+                        }   
+                    }
+                }
+                // user
+                else{
+                    for (const userls of user_list){
+                        if (userls == user){
+                            content += `<p>${userls} (me)</p><br>`;
+                        }
+                        else if (userls == current_admin){
+                            content += `<p>${userls} (Admin)</p><br>`;
+                        }
+                        else if (coadmin_ls.includes(userls)){
+                            content += `<p>${userls} (co-Admin)</p><br>`;
+                        }
+                        else{
+                            content += `<p>${userls}</p><br>`;
+                        }
+                        
+                    }
+                }
+                
+                userInroom.innerHTML = content;
+            }
+
+            function kickUser(user_k){
+                socketio.emit('kick_user', {kicked_user: user_k, room: currentRoom});
+            }
+
+            function banUser(user_b){
+                socketio.emit('ban_user', {banned_user: user_b, room: currentRoom});
+            }
+
+            function quitRoom(){
+                socketio.emit('quit_room', {quit_user: user, room: currentRoom});
+            }
+
+            function muteUser(user_m){
+                socketio.emit('mute_user', {muted_user: user_m, room: currentRoom});
+                document.getElementById(`mute${user_m}`).onclick = function(){
+                    unmuteUser(user_m);};
+                document.getElementById(`mute${user_m}`).innerHTML = "unmute";
+
+            }
+
+            function unmuteUser(user_m){
+                socketio.emit('unmute_user', {unmuted_user: user_m, room: currentRoom});
+                document.getElementById(`mute${user_m}`).onclick = function(){
+                    muteUser(user_m);};
+                document.getElementById(`mute${user_m}`).innerHTML = "mute";
+            }
+
+            function assignUser(user_a){
+                socketio.emit('assign_user', {assigned_user: user_a, room: currentRoom});
+            }
+
+            function unassignUser(user_a){
+                socketio.emit('unassign_user', {unassigned_user: user_a, room: currentRoom});
+            }
+        </script>
+    </head>
+    <body>
+        <div id="enter_name">
+        <input type="text" id="name" placeholder = "Enter nickname here">
+        <button id="nickname_btn" onclick="enterName()">confirm nickname</button>
+        </div>
+        <div id="create_room" style="display: none;">
+            <input type="text" id="create_publicroom_name" placeholder = "Enter room name here">
+            <button id="create_publicroom_btn" onclick="create_public_room()">create public room</button>
+            <input type="text" id="create_privateroom_name" placeholder = "Enter room name here">
+            <input type="text" id="privateroom_pass" placeholder = "Enter room password here">
+            <button id="create_privateroom_btn" onclick="create_private_room()">create private room</button>
+        </div>
+        <div id="chatRoom_ls" class="list" style="display: none;"></div>
+        <div id="user_ls" class="list" style="display: none;"></div>
+        
+        <div id="chatbox" style="display: none;"></div>
+        <div id="send" style="display: none;">
+            <textarea id="message_input"></textarea><br>
+            to: 
+            <select id="user_visible">
+                <option value="all">everyone</option>
+            </select>
+            <button onclick="sendMessage()">send</button><button onclick="quitRoom()">quit room</button>
+        </div>
+    </body>
+</html>

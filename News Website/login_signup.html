@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>WashU News Website</title>
+        <link rel="stylesheet" type="text/css" href="login_page.css">
+    </head>
+    <body>
+        <h1 id="welcome">Welcome to WashU News Website</h1>
+        <div id="userInput">
+            <!--login field-->
+            <form action="login.php" method="POST">
+                <label>Username: </label><input type="text" name="username"><br>
+                <label>Password: </label><input type="password" name="password"><br><br>
+                <input type="submit" value="Login">
+            </form>
+            <p>-----------------------Or-----------------------</p>
+            <!--sign up field-->
+            <form action="signup.php" method="POST">
+                <label>Username: </label> <input type="text" name="username"><br>
+                <label>Password: </label> <input type="password" name="password"><br>
+                <label>Confirm password: </label><input type="password" name="confirm_pass"><br><br>
+                <input type="submit" name="btn_signup" value="SignUp">
+            </form>
+        </div>
+
+    </body>
+</html>

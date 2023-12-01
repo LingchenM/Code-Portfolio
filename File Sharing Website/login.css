@@ -1,0 +1,16 @@
+#welcome{
+    text-align: center;
+    color: blueviolet;
+}
+body{
+    background-color: antiquewhite;
+}
+div #userInput{
+    text-align: center;
+    margin: auto;
+    margin-top: 10%;
+}
+div {
+    text-align: center;
+    margin: auto;
+}

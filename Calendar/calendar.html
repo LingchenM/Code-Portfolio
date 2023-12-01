@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <!--the following css help to adjust the calendar to fit in the monitor resolution-->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+        <title>Simple Calendar</title>
+        <link rel="stylesheet" href="calendar.css">
+    </head>
+    <body>
+        <h1 id="user_title" style="text-align: center;">Simple Calendar</h1>
+        <div class="signin_up">
+            <button onclick="sign_up()">SignUp</button> <button onclick="log_in()">Log_in</button>
+        </div>
+        <div class="calendar">
+            <div class="month-header">
+                <button onclick="prevMonth()">Prev</button>
+                <span id="currentMonth"></span>
+                <button onclick="nextMonth()">Next</button>
+            </div>
+            <div class="days-header">
+                <div>Sun</div>
+                <div>Mon</div>
+                <div>Tue</div>
+                <div>Wed</div>
+                <div>Thu</div>
+                <div>Fri</div>
+                <div>Sat</div>
+            </div>
+            <div class="days" id="calendarDays">
+                <!-- Days will be inserted here by JavaScript -->
+            </div>
+            <div id="category_btn"></div>
+        </div>
+        <div id="myModal" class="modal">
+            <div class="modal-content">
+                <input type="text" id="eventInvitees" placeholder="Invite users (comma separated usernames)">
+                <span class="close">&times;</span>
+                <p>Add Event</p >
+                <input type="text" id="eventTitle" placeholder="Event Name">
+                <input type="text" id="eventTime" placeholder="Event Time"><br>
+                category: 
+                <select id="category_add">
+                    <option value="default">default</option>
+                    <option value="festival">festival</option>
+                    <option value="birthday">birthday</option>
+                    <option value="deadline">deadline</option>
+                </select>
+                <button id="addEventButton">Add Event</button>
+            </div>
+        </div>
+        <div id="myModal2" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <p>Edit Event</p >
+                <textarea rows="1" cols="25" id="eventTitle_edit"></textarea> 
+                <textarea rows="1" cols="25" id="eventTime_edit"></textarea><br>
+                category: 
+                <select id="category_edit">
+                    <option value="default">default</option>
+                    <option value="festival">festival</option>
+                    <option value="birthday">birthday</option>
+                    <option value="deadline">deadline</option>
+                </select><br>
+                <button id="editEventButton">Edit Event</button>
+                <button id="deleteEventButton">Delete Event</button>
+            </div>
+        </div>
+        <script src="calendar.js"></script>
+    </body>
+</html>

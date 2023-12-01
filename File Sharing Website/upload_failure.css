@@ -1,0 +1,22 @@
+body{
+    background-color: antiquewhite;
+    text-align: center;
+}
+#notice{
+    color: red;
+    font-size: 45px;
+    vertical-align: middle;
+}
+p #redirect{
+    position: absolute;
+    vertical-align: middle;
+    bottom: 0;
+    font-size: larger;
+}
+div{
+    position: absolute;
+    margin: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}

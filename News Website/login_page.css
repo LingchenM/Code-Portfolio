@@ -1,0 +1,19 @@
+#welcome{
+    text-align: center;
+}
+
+div{
+    text-align: center;
+    margin: auto;
+    margin-top: 10%;
+}
+label{
+    position: absolute;
+    left: 32%;
+    width: 200px;
+    display: inline-block;
+    text-align: right;
+}
+body{
+    background-color: #c2ccd0;
+}
