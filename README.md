@@ -1,5 +1,5 @@
 # Code-Portfolio
-### Project Description:
+## Project Description:
 
 - ###### Calendar
 
@@ -28,4 +28,6 @@
 - ###### News Website
 
   A news website where users can add commentary and comments.
+
+See detailed description inside each project's folder.
 
