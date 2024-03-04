@@ -28,6 +28,10 @@
 - #### News Website
 
   A news website where users can add commentary and comments.
+  
+- #### Reverse TCP malware
+
+  A reverse TCP malware that can perform more functions in addition to shell command.
 
 See detailed description inside each project's folder.
 
