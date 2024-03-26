@@ -1,0 +1,6 @@
+﻿  server.cpp
+  Generating code
+  Previous IPDB not found, fall back to full compilation.
+  All 69 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  VM_ReverseTCP_server.vcxproj -> E:\Code Portfolio\project\VM_ReverseTCP_server\Release\VM_ReverseTCP_server.exe
